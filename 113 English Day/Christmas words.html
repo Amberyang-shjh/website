@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打地鼠遊戲</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #2c3e50, #3498db);
+            font-family: 'Comic Sans MS', sans-serif;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        h1 {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            font-size: 3rem;
+            color: #ecf0f1;
+            margin: 0 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .question {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .game {
+            display: grid;
+            grid-template-columns: repeat(4, 120px);
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .hole {
+            width: 120px;
+            height: 120px;
+            background-color: #27ae60;
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px #1e8449;
+            transition: transform 0.1s ease;
+        }
+
+        .hole:active {
+            box-shadow: 0 4px #1e8449;
+            transform: translateY(4px);
+        }
+
+        .mole {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: radial-gradient(circle, #e74c3c, #c0392b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px rgba(0, 0, 0, 0.3);
+            transform: scale(0);
+            transition: transform 0.2s ease;
+        }
+
+        .mole.active {
+            transform: scale(1);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .button, .score-time {
+            font-size: 1.5rem;
+        }
+
+        button {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 8px #c0392b;
+            font-size: 1.5rem;
+            transition: transform 0.1s ease;
+        }
+
+        button:active {
+            box-shadow: 0 4px #c0392b;
+            transform: translateY(4px);
+        }
+
+        .score-time {
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden-area {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0);
+            cursor: pointer;
+        }
+
+        .generator-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #fff;
+            font-family: 'Comic Sans MS', sans-serif;
+            width: 800px;
+            padding: 20px;
+        }
+
+        .generator-screen h1 {
+            color: #e74c3c;
+        }
+
+        .generator-screen textarea {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .generator-screen .buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .generator-screen button {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 8px #c0392b;
+        }
+
+        .generator-screen button:active {
+            box-shadow: 0 4px #c0392b;
+            transform: translateY(4px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        table, th, td {
+            border: 1px solid #e74c3c;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        #startGameFromGenerator {
+            display: none;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 14px;
+            color: #ecf0f1;
+        }
+
+        .footer a {
+            color: #ecf0f1;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        #downloadButton {
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 8px #c0392b;
+        }
+
+        #downloadButton:active {
+            box-shadow: 0 4px #c0392b;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>打地鼠遊戲</h1>
+        <div class="game-area">
+            <div class="question" id="question"></div>
+            <div class="game">
+                <div class="hole" id="hole1"></div>
+                <div class="hole" id="hole2"></div>
+                <div class="hole" id="hole3"></div>
+                <div class="hole" id="hole4"></div>
+                <div class="hole" id="hole5"></div>
+                <div class="hole" id="hole6"></div>
+                <div class="hole" id="hole7"></div>
+                <div class="hole" id="hole8"></div>
+                <div class="hole" id="hole9"></div>
+                <div class="hole" id="hole10"></div>
+                <div class="hole" id="hole11"></div>
+                <div class="hole" id="hole12"></div>
+                <div class="hole" id="hole13"></div>
+                <div class="hole" id="hole14"></div>
+                <div class="hole" id="hole15"></div>
+                <div class="hole" id="hole16"></div>
+            </div>
+            <div class="controls">
+                <button id="startButton" onclick="startGame()">開始遊戲</button>
+                <div class="score-time">
+                    <div>剩餘時間: <span id="time">60</span>秒</div>
+                    <div>分數: <span id="score">0</span></div>
+                </div>
+            </div>
+            <div class="hidden-area" onclick="switchToGenerator()"></div>
+        </div>
+    </div>
+
+    <div class="generator-screen">
+        <h1>打地鼠遊戲生成器</h1>
+        <textarea id="inputArea">Christmas	聖誕節
+Christmas Eve	聖誕夜
+Santa Claus	聖誕老人
+bells	鈴鐺
+reindeer	馴鹿
+elf	小精靈
+Christmas stocking	聖誕襪
+gift	禮物
+Christmas tree	聖誕樹
+Ornaments	裝飾品
+Santa’s sack	聖誕老人的袋子
+star	星星
+lights	燈飾
+hot chocolate with marshmallows	熱巧克力配棉花糖
+snowflake	雪花
+snowman	雪人
+candy cane	拐杖糖
+mistletoe	槲寄生
+wreath	花環
+ribbon	緞帶
+Christmas carols	聖誕頌歌
+fireplace	壁爐
+gingerbread house	薑餅屋
+Christmas pudding	聖誕布丁
+sleigh	雪橇</textarea>
+        <div class="buttons">
+            <button onclick="submitData()">送出</button>
+            <button id="startGameFromGenerator" onclick="switchToGame()">開始遊玩</button>
+            <button id="downloadButton" onclick="downloadGame()">下載完整遊戲</button>
+        </div>
+        <table id="outputTable">
+            <thead>
+                <tr>
+                    <th>文字</th>
+                    <th>說明</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        Made by <a href="https://kentxchang.blogspot.tw" target="_blank">阿剛老師</a>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeUp = false;
+        let questions = [];
+        let currentQuestion = 0;
+        let countdown;
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const inputArea = document.getElementById('inputArea');
+            if (inputArea.value.trim() !== '') {
+                submitData();
+                switchToGame();
+            }
+        });
+
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            return holes[idx];
+        }
+
+        function clearMoles() {
+            const moles = document.querySelectorAll('.mole');
+            moles.forEach(mole => mole.remove());
+        }
+
+        function showMoles() {
+            clearMoles(); // Clear existing moles before showing new ones
+            const holes = document.querySelectorAll('.hole');
+            const numOfMoles = Math.floor(Math.random() * 2) + 2; // 2 to 3 moles
+            const time = 2500; // 1.5 seconds
+            const selectedHoles = [];
+            for (let i = 0; i < numOfMoles; i++) {
+                let hole;
+                do {
+                    hole = randomHole(holes);
+                } while (selectedHoles.includes(hole));
+                selectedHoles.push(hole);
+
+                const mole = document.createElement('div');
+                mole.classList.add('mole');
+                mole.textContent = questions[Math.floor(Math.random() * questions.length)].text;
+                hole.appendChild(mole);
+                mole.classList.add('active');
+                setTimeout(() => {
+                    mole.classList.remove('active');
+                    hole.removeChild(mole);
+                }, time);
+            }
+
+            // Add a correct answer mole
+            const correctHole = selectedHoles[Math.floor(Math.random() * selectedHoles.length)];
+            const correctMole = correctHole.querySelector('.mole');
+            correctMole.textContent = questions[currentQuestion].text;
+
+            if (!timeUp) {
+                setTimeout(showMoles, time);
+            }
+        }
+
+        function startGame() {
+            clearMoles(); // Clear existing moles before starting the game
+            score = 0;
+            timeUp = false;
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = 60;
+            document.getElementById('startButton').style.display = 'none'; // Hide start button
+            countdown = setInterval(updateTime, 1000);
+            showNextQuestion();
+            showMoles();
+            setTimeout(() => {
+                timeUp = true;
+                clearInterval(countdown);
+                document.getElementById('startButton').style.display = 'block'; // Show start button
+            }, 60000);
+        }
+
+        function updateTime() {
+            let currentTime = parseInt(document.getElementById('time').textContent);
+            if (currentTime > 0) {
+                document.getElementById('time').textContent = currentTime - 1;
+            }
+        }
+
+        function showNextQuestion() {
+            const questionElement = document.getElementById('question');
+            currentQuestion = Math.floor(Math.random() * questions.length);
+            questionElement.textContent = questions[currentQuestion].description;
+        }
+
+        function switchToGame() {
+            document.querySelector('.generator-screen').style.display = 'none';
+            document.querySelector('.container').style.display = 'flex';
+            startGame();
+        }
+
+        function switchToGenerator() {
+            document.querySelector('.container').style.display = 'none';
+            document.querySelector('.generator-screen').style.display = 'flex';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'r' || event.key === 'R') {
+                switchToGenerator();
+            }
+        });
+
+        document.querySelectorAll('.hole').forEach(hole => {
+            hole.addEventListener('click', function (e) {
+                if (!e.target.matches('.mole')) return;
+                if (e.target.textContent === questions[currentQuestion].text) {
+                    score++;
+                    showNextQuestion();
+                } else {
+                    score--;
+                }
+                document.getElementById('score').textContent = score;
+                e.target.style.display = 'none';
+            });
+        });
+
+        function submitData() {
+            const inputArea = document.getElementById('inputArea');
+            const inputText = inputArea.value.trim();
+            const rows = inputText.split('\n');
+            const tableBody = document.querySelector('#outputTable tbody');
+            tableBody.innerHTML = '';
+            questions = [];
+
+            rows.forEach(row => {
+                const cols = row.split(/,|\t/);
+                if (cols.length === 2) {
+                    const tr = document.createElement('tr');
+                    const td1 = document.createElement('td');
+                    const td2 = document.createElement('td');
+                    td1.textContent = cols[0].trim();
+                    td2.textContent = cols[1].trim();
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tableBody.appendChild(tr);
+                    questions.push({ text: cols[0].trim(), description: cols[1].trim() });
+                }
+            });
+
+            document.getElementById('startGameFromGenerator').style.display = 'block';
+        }
+
+        function downloadGame() {
+            const inputArea = document.getElementById('inputArea');
+            const currentContent = inputArea.value.trim();
+            const htmlContent = document.documentElement.outerHTML;
+            const newContent = htmlContent.replace(/<textarea id="inputArea">[\s\S]*?<\/textarea>/, `<textarea id="inputArea">${currentContent}<\/textarea>`);
+            const blob = new Blob([newContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'whack-a-mole.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+
+
+</body></html>
